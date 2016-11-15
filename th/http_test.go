@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Bruinxs/util"
 	"github.com/Bruinxs/util/ut"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,8 +30,32 @@ func TestGet_M(t *testing.T) {
 		w.Write(data)
 	}))
 
+	http.HandleFunc("/post", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		var m ut.M
+		err = json.Unmarshal(data, &m)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		data, err = json.Marshal(m)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		w.Write(data)
+	}))
+
 	ts := httptest.NewServer(http.DefaultServeMux)
-	res, err := Get_M(ts.URL, "p1/p2", ut.M{"s2": "string", "i2": 10, "f2": 5.32})
+
+	//get
+	res, err := GP_M(ts.URL, "p1/p2", ut.M{"s2": "string", "i2": 10, "f2": 5.32}, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -59,6 +84,17 @@ func TestGet_M(t *testing.T) {
 		return
 	}
 	if g, w := res.FloatV("f2"), 5.32; g != w {
+		t.Errorf("got(%v) != %v", g, w)
+		return
+	}
+
+	//post
+	res, err = GP_M(ts.URL, "post", nil, ut.M{"s3": "string3"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if g, w := res.StrV("s3"), "string3"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}

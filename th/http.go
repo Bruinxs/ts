@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Bruinxs/util"
 	"github.com/Bruinxs/util/ut"
 )
 
-func Get_M(addr, path string, query ut.M) (ut.M, error) {
+func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
 	if len(path) > 0 && path[0] != '/' {
 		path = "/" + path
 	}
@@ -24,7 +25,13 @@ func Get_M(addr, path string, query ut.M) (ut.M, error) {
 	}
 	url := addr + path + query_s
 
-	resp, err := http.Get(url)
+	var resp *http.Response
+	var err error
+	if body == nil {
+		resp, err = http.Get(url)
+	} else {
+		resp, err = http.Post(url, "application/json", strings.NewReader(util.I2Json(body)))
+	}
 	if err != nil {
 		return nil, err
 	}
