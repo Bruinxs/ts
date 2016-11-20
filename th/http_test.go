@@ -1,4 +1,4 @@
-package tu
+package th
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ import (
 
 func TestGet_M(t *testing.T) {
 	http.HandleFunc("/p1/p2", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json;charset=utf-8")
 		m := ut.M{"s1": "str", "i1": 1, "f1": 3.14, "o1": ut.M{"key": "val"}, "a1": []string{"fake"}}
 		err := r.ParseForm()
 		if err != nil {
@@ -31,6 +32,7 @@ func TestGet_M(t *testing.T) {
 	}))
 
 	http.HandleFunc("/post", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json;charset=utf-8")
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			t.Error(err)
@@ -50,6 +52,10 @@ func TestGet_M(t *testing.T) {
 			return
 		}
 		w.Write(data)
+	}))
+
+	http.HandleFunc("/data", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("data"))
 	}))
 
 	ts := httptest.NewServer(http.DefaultServeMux)
@@ -95,6 +101,17 @@ func TestGet_M(t *testing.T) {
 		return
 	}
 	if g, w := res.StrV("s3"), "string3"; g != w {
+		t.Errorf("got(%v) != %v", g, w)
+		return
+	}
+
+	//data
+	res, err = GP_M(ts.URL, "data", nil, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if g, w := res.StrV("data"), "data"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}

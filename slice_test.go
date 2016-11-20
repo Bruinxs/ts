@@ -1,4 +1,4 @@
-package ts
+package tu
 
 import "testing"
 

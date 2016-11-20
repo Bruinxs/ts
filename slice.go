@@ -1,4 +1,4 @@
-package ts
+package tu
 
 func CmpStr(s1, s2 []string) bool {
 	if len(s1) != len(s2) {

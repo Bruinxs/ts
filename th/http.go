@@ -1,4 +1,4 @@
-package tu
+package th
 
 import (
 	"encoding/json"
@@ -47,9 +47,13 @@ func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
 	}
 
 	var m ut.M
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		return nil, err
+	if strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		err = json.Unmarshal(data, &m)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		m = ut.M{"data": string(data)}
 	}
 
 	return m, nil
