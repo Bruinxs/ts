@@ -11,7 +11,7 @@ import (
 	"github.com/Bruinxs/util/ut"
 )
 
-func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
+func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error) {
 	if len(path) > 0 && path[0] != '/' {
 		path = "/" + path
 	}
@@ -21,16 +21,24 @@ func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
 		for key, val := range query {
 			ss = append(ss, fmt.Sprintf("%v=%v", key, val))
 		}
-		query_s = "?" + strings.Join(ss, "&")
+		query_s = strings.Join(ss, "&")
 	}
-	url := addr + path + query_s
 
+	var url string
 	var resp *http.Response
 	var err error
-	if body == nil {
-		resp, err = http.Get(url)
-	} else {
+	switch contentType {
+	case "json":
+		url = addr + path + "?" + query_s
 		resp, err = http.Post(url, "application/json", strings.NewReader(util.I2Json(body)))
+
+	case "form":
+		url = addr + path
+		resp, err = http.Post(url, "application/x-www-form-urlencoded", strings.NewReader(query_s))
+
+	default:
+		url = addr + path + "?" + query_s
+		resp, err = http.Get(url)
 	}
 	if err != nil {
 		return nil, err
@@ -57,4 +65,16 @@ func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
 	}
 
 	return m, nil
+}
+
+func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
+	if body == nil {
+		return request(addr, path, "", query, nil)
+	} else {
+		return request(addr, path, "json", query, body)
+	}
+}
+
+func Post(addr, path string, query ut.M) (ut.M, error) {
+	return request(addr, path, "form", query, nil)
 }

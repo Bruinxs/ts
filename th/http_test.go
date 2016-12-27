@@ -116,3 +116,25 @@ func TestGet_M(t *testing.T) {
 		return
 	}
 }
+
+func TestPost(t *testing.T) {
+	http.HandleFunc("/post/data", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		w.Write([]byte(r.PostForm.Get("data")))
+	}))
+	hts := httptest.NewServer(http.DefaultServeMux)
+
+	res, err := Post(hts.URL, "post/data", ut.M{"data": "val"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if g, w := res.StrV("data"), "val"; g != w {
+		t.Errorf("got(%v) != %v", g, w)
+		return
+	}
+}
