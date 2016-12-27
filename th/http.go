@@ -24,20 +24,21 @@ func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error
 		query_s = strings.Join(ss, "&")
 	}
 
-	var url string
+	url := addr + path
+	if query_s != "" {
+		url += "?" + query_s
+	}
+
 	var resp *http.Response
 	var err error
 	switch contentType {
 	case "json":
-		url = addr + path + "?" + query_s
 		resp, err = http.Post(url, "application/json", strings.NewReader(util.I2Json(body)))
 
 	case "form":
-		url = addr + path
-		resp, err = http.Post(url, "application/x-www-form-urlencoded", strings.NewReader(query_s))
+		resp, err = http.Post(addr+path, "application/x-www-form-urlencoded", strings.NewReader(query_s))
 
 	default:
-		url = addr + path + "?" + query_s
 		resp, err = http.Get(url)
 	}
 	if err != nil {
