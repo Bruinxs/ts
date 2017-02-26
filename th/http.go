@@ -70,12 +70,20 @@ func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error
 
 func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
 	if body == nil {
-		return request(addr, path, "", query, nil)
+		return Get(addr, path, query)
 	} else {
-		return request(addr, path, "json", query, body)
+		return PostJson(addr, path, query, body)
 	}
 }
 
 func Post(addr, path string, query ut.M) (ut.M, error) {
 	return request(addr, path, "form", query, nil)
+}
+
+func PostJson(addr, path string, query ut.M, body ut.M) (ut.M, error) {
+	return request(addr, path, "json", query, body)
+}
+
+func Get(addr, path string, query ut.M) (ut.M, error) {
+	return request(addr, path, "", query, nil)
 }
