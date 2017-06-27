@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Bruinxs/util"
-	"github.com/Bruinxs/util/ut"
+	"github.com/bruinxs/util"
+	"github.com/bruinxs/util/ut"
 )
 
 func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error) {
@@ -44,15 +44,14 @@ func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http get(%v) response code(%v) illegal", url, resp.StatusCode)
-	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http get(%v) response code(%v) illegal, response data:\n%v", url, resp.StatusCode, string(data))
 	}
 
 	var m ut.M
@@ -66,14 +65,6 @@ func request(addr, path, contentType string, query ut.M, body ut.M) (ut.M, error
 	}
 
 	return m, nil
-}
-
-func GP_M(addr, path string, query ut.M, body ut.M) (ut.M, error) {
-	if body == nil {
-		return Get(addr, path, query)
-	} else {
-		return PostJson(addr, path, query, body)
-	}
 }
 
 func Post(addr, path string, query ut.M) (ut.M, error) {
