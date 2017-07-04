@@ -1,13 +1,15 @@
-package th
+package th_test
 
 import (
 	"encoding/json"
-	"github.com/Bruinxs/util"
-	"github.com/Bruinxs/util/ut"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	. "github.com/bruinxs/ts/th"
+	"github.com/bruinxs/util"
+	"github.com/bruinxs/util/ut"
 )
 
 func TestGet_M(t *testing.T) {
@@ -61,57 +63,57 @@ func TestGet_M(t *testing.T) {
 	ts := httptest.NewServer(http.DefaultServeMux)
 
 	//get
-	res, err := GP_M(ts.URL, "p1/p2", ut.M{"s2": "string", "i2": 10, "f2": 5.32}, nil)
+	res, err := Get(ts.URL, "p1/p2", ut.M{"s2": "string", "i2": 10, "f2": 5.32})
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if g, w := res.StrV("s1"), "str"; g != w {
+	if g, w := res.Str("s1"), "str"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
-	if g, w := res.StrV("s2"), "string"; g != w {
+	if g, w := res.Str("s2"), "string"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
 
-	if g, w := res.IntV("i1"), 1; g != w {
+	if g, w := res.Int("i1"), 1; g != w {
 		t.Errorf("got(%v) != %v, res(%v)", g, w, util.I2Json(res))
 		return
 	}
-	if g, w := res.IntV("i2"), 10; g != w {
+	if g, w := res.Int("i2"), 10; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
 
-	if g, w := res.FloatV("f1"), 3.14; g != w {
+	if g, w := res.Float("f1"), 3.14; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
-	if g, w := res.FloatV("f2"), 5.32; g != w {
+	if g, w := res.Float("f2"), 5.32; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
 
 	//post
-	res, err = GP_M(ts.URL, "post", nil, ut.M{"s3": "string3"})
+	res, err = PostJson(ts.URL, "post", nil, ut.M{"s3": "string3"})
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if g, w := res.StrV("s3"), "string3"; g != w {
+	if g, w := res.Str("s3"), "string3"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
 
 	//data
-	res, err = GP_M(ts.URL, "data", nil, nil)
+	res, err = Get(ts.URL, "data", nil)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if g, w := res.StrV("data"), "data"; g != w {
+	if g, w := res.Str("data"), "data"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
@@ -133,7 +135,7 @@ func TestPost(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if g, w := res.StrV("data"), "val"; g != w {
+	if g, w := res.Str("data"), "val"; g != w {
 		t.Errorf("got(%v) != %v", g, w)
 		return
 	}
