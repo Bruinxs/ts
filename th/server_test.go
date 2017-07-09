@@ -13,12 +13,36 @@ func TestServerTester(t *testing.T) {
 	st.Mux.HandFunc("^/one/test(\\?.*)?$", func(ctx *route.SessionCtx) route.Result {
 		return ctx.Success(ut.M{"msg": "ok"})
 	})
+
+	//get
 	res, err := st.Get("test", nil)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if res.StrP("data/msg") != "ok" {
+	if res.StrP("msg") != "ok" {
+		t.Error("ill res ", res)
+		return
+	}
+
+	//post
+	res, err = st.Post("test", nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if res.StrP("msg") != "ok" {
+		t.Error("ill res ", res)
+		return
+	}
+
+	//post json
+	res, err = st.PostJ("test", nil, ut.M{})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if res.StrP("msg") != "ok" {
 		t.Error("ill res ", res)
 		return
 	}

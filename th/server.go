@@ -6,13 +6,15 @@ import (
 	"strings"
 
 	"github.com/bruinxs/mbf/route"
+	"github.com/bruinxs/util"
 	"github.com/bruinxs/util/ut"
 )
 
 type ServerTester struct {
 	*httptest.Server
-	Path map[string]string
-	Mux  *route.Mux
+	Path        map[string]string
+	Mux         *route.Mux
+	RespChecker func(resp ut.M) (ut.M, error)
 }
 
 func NewServerTester() *ServerTester {
@@ -21,7 +23,18 @@ func NewServerTester() *ServerTester {
 	st.Mux.RegisterHook = st.register
 	st.Server = httptest.NewServer(st.Mux)
 	st.Path = map[string]string{}
+	st.RespChecker = defaultChecker
 	return st
+}
+
+func defaultChecker(resp ut.M) (ut.M, error) {
+	if resp == nil {
+		return nil, util.Err("arg resp is nil")
+	}
+	if !resp.Exist("code") || resp.Int("code") != 0 {
+		return resp, util.Err("resp illegal data -> %v", util.I2Json(resp))
+	}
+	return resp.Map("data"), nil
 }
 
 func (st *ServerTester) register(_, pattern string, _ route.Handle) {
@@ -35,13 +48,37 @@ func (st *ServerTester) register(_, pattern string, _ route.Handle) {
 }
 
 func (st *ServerTester) Get(key string, query ut.M) (ut.M, error) {
-	return Get(st.URL, st.Path[key], query)
+	resp, err := Get(st.URL, st.Path[key], query)
+	if err != nil {
+		return nil, err
+	}
+	if st.RespChecker != nil {
+		return st.RespChecker(resp)
+	} else {
+		return resp, nil
+	}
 }
 
 func (st *ServerTester) Post(key string, query ut.M) (ut.M, error) {
-	return Post(st.URL, st.Path[key], query)
+	resp, err := Post(st.URL, st.Path[key], query)
+	if err != nil {
+		return nil, err
+	}
+	if st.RespChecker != nil {
+		return st.RespChecker(resp)
+	} else {
+		return resp, nil
+	}
 }
 
 func (st *ServerTester) PostJ(key string, query, body ut.M) (ut.M, error) {
-	return PostJson(st.URL, st.Path[key], query, body)
+	resp, err := PostJson(st.URL, st.Path[key], query, body)
+	if err != nil {
+		return nil, err
+	}
+	if st.RespChecker != nil {
+		return st.RespChecker(resp)
+	} else {
+		return resp, nil
+	}
 }
