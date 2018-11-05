@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"strings"
 
 	"github.com/bruinxs/com"
@@ -15,6 +16,11 @@ var DefaultClient = &Client{http.DefaultClient}
 
 type Client struct {
 	*http.Client
+}
+
+func NewClient() *Client {
+	cookieJar, _ := cookiejar.New(nil)
+	return &Client{&http.Client{Jar: cookieJar}}
 }
 
 func (c *Client) do(host, path, method, contentType string, query com.Map, body io.Reader) (com.Map, error) {
