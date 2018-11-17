@@ -81,3 +81,41 @@ func TestPostJSON(t *testing.T) {
 		assert.EqualValues(out, arg.in)
 	}
 }
+
+func TestCookie(t *testing.T) {
+	set, want := "", ""
+	mux := http.NewServeMux()
+	mux.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Path:  "",
+			Name:  "name",
+			Value: set,
+		})
+	})
+	mux.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("name")
+		if err != nil {
+			t.Fatal(err)
+		}
+		want = c.Value
+	})
+
+	ts := httptest.NewServer(mux)
+
+	client := testutil.NewClient()
+	for _, w := range []string{"11", "22", "33"} {
+		set = w
+		_, err := client.Post(ts.URL, "set", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = client.Get(ts.URL, "get", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if w != want {
+			t.Fatal(w, " != ", want)
+		}
+	}
+}
