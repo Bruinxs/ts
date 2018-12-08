@@ -81,7 +81,7 @@ func (c *Client) Post(host, path string, query com.Map) (com.Map, error) {
 	return c.do(host, path, "POST", "application/x-www-form-urlencoded", query, nil)
 }
 
-func (c *Client) PostJSON(host, path string, query, body com.Map) (com.Map, error) {
+func (c *Client) PostJSON(host, path string, query com.Map, body interface{}) (com.Map, error) {
 	return c.do(host, path, "POST", "application/json", query, strings.NewReader(com.Json(body)))
 }
 
@@ -93,6 +93,6 @@ func Post(host, path string, query com.Map) (com.Map, error) {
 	return DefaultClient.Post(host, path, query)
 }
 
-func PostJSON(host, path string, query, body com.Map) (com.Map, error) {
+func PostJSON(host, path string, query com.Map, body interface{}) (com.Map, error) {
 	return DefaultClient.PostJSON(host, path, query, body)
 }
