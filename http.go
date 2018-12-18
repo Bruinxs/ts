@@ -36,7 +36,7 @@ func (c *Client) do(host, path, method, contentType string, query com.Map, body 
 	if len(query) > 0 {
 		kvs := []string{}
 		for k, v := range query {
-			kvs = append(kvs, fmt.Sprintf("%s=%s", k, v))
+			kvs = append(kvs, fmt.Sprintf("%s=%v", k, v))
 		}
 		url += fmt.Sprintf("?%s", strings.Join(kvs, "&"))
 	}
