@@ -77,8 +77,16 @@ func (c *Client) Get(host, path string, query com.Map) (com.Map, error) {
 	return c.do(host, path, "GET", "", query, nil)
 }
 
-func (c *Client) Post(host, path string, query com.Map) (com.Map, error) {
-	return c.do(host, path, "POST", "application/x-www-form-urlencoded", query, nil)
+func (c *Client) Post(host, path string, query com.Map, forms ...com.Map) (com.Map, error) {
+	var body io.Reader
+	if len(forms) > 0 {
+		kvs := []string{}
+		for k, v := range forms[0] {
+			kvs = append(kvs, fmt.Sprintf("%s=%v", k, v))
+		}
+		body = strings.NewReader(strings.Join(kvs, "&"))
+	}
+	return c.do(host, path, "POST", "application/x-www-form-urlencoded", query, body)
 }
 
 func (c *Client) PostJSON(host, path string, query com.Map, body interface{}) (com.Map, error) {
